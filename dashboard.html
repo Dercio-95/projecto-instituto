@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title>Lista de Estudantes</title>
+    <script src="https://mozilla.github.io/pdf.js/build/pdf.js"></script>
+</head>
+<body>
+
+    <main>
+        <h2>Lista de Estudantes</h2>
+
+        <!-- Botões de funcionalidade -->
+        <div class="funcionalidades">
+            <button onclick="buscarEstudantes()">Buscar Estudantes</button>
+            <button onclick="gerarRelatorio()">Gerar Relatório</button>
+            <a href="add_student.html"><button>Adicionar Novos Estudantes</button></a>
+        </div>
+
+        <!-- Conteúdo da lista de estudantes -->
+        <div id="lista-estudantes">
+            <!-- Aqui será exibida a lista de estudantes carregada dinamicamente do servidor -->
+        </div>
+
+    </main>
+
+    <script>
+        // Função para buscar estudantes no servidor
+        function buscarEstudantes() {
+            fetch('server.php') // Atualize a URL conforme necessário
+                .then(response => response.json())
+                .then(data => {
+                    // Atualiza o conteúdo da div "lista-estudantes" com os resultados
+                    const listaEstudantes = document.getElementById('lista-estudantes');
+                    listaEstudantes.innerHTML = '';
+
+                    // Itera sobre os dados e cria elementos para exibir na lista
+                    data.forEach(estudante => {
+                        const estudanteElement = document.createElement('div');
+                        estudanteElement.textContent = `${estudante.nome} - ${estudante.curso}`;
+                        listaEstudantes.appendChild(estudanteElement);
+                    });
+                })
+                .catch(error => console.error('Erro ao buscar estudantes:', error));
+        }
+
+        // Função para gerar relatório
+        function gerarRelatorio() {
+            fetch('server.php?relatorio=true') // Atualize a URL e parâmetros conforme necessário
+                .then(response => response.arrayBuffer())
+                .then(data => {
+                    // Exibe o relatório em PDF usando PDF.js
+                    exibirPDF(data);
+                })
+                .catch(error => console.error('Erro ao gerar relatório:', error));
+        }
+
+        // Função para exibir PDF usando PDF.js
+        function exibirPDF(pdfData) {
+            // Use PDF.js para renderizar o PDF na página
+            pdfjsLib.getDocument(new Uint8Array(pdfData))
+                .then(pdf => {
+                    // O número da página a ser exibida (1 no exemplo)
+                    const pageNumber = 1;
+                    pdf.getPage(pageNumber).then(page => {
+                        const canvas = document.createElement('canvas');
+                        const context = canvas.getContext('2d');
+                        const viewport = page.getViewport({ scale: 1.5 });
+
+                        canvas.height = viewport.height;
+                        canvas.width = viewport.width;
+
+                        const renderContext = {
+                            canvasContext: context,
+                            viewport: viewport
+                        };
+
+                        page.render(renderContext).promise.then(() => {
+                            // Adiciona a página renderizada ao corpo do documento
+                            document.body.appendChild(canvas);
+                        });
+                    });
+                })
+                .catch(error => console.error('Erro ao exibir PDF:', error));
+        }
+
+        // Função para cadastrar estudante
+        function cadastrarEstudante() {
+            const form = document.getElementById('cadastroForm');
+            const formData = new FormData(form);
+
+            fetch('server.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Aqui você pode lidar com a resposta do servidor, como exibir uma mensagem de sucesso
+                console.log('Estudante cadastrado com sucesso:', data);
+
+                // Redirecionar para a página de sucesso
+                window.location.href = 'success_message.html';
+            })
+            .catch(error => console.error('Erro ao cadastrar estudante:', error));
+        }
+    </script>
+
+</body>
+</html>
+
+

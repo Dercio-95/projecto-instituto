@@ -1,0 +1,42 @@
+
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <title>Mensagem de Sucesso</title>
+</head>
+<body>
+
+    <div class="container">
+        <h2>Estudante Cadastrado com Sucesso</h2>
+        <p>Deseja cadastrar outro estudante?</p>
+        <button onclick="location.href='add_student.html'">Sim</button>
+        <button onclick="location.href='dashboard.html'">Não, Obrigado</button>
+    </div>
+
+    <script>
+        // Função para cadastrar estudante
+        function cadastrarEstudante() {
+            const form = document.getElementById('cadastroForm');
+            const formData = new FormData(form);
+
+            fetch('server.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Aqui você pode lidar com a resposta do servidor, como exibir uma mensagem de sucesso
+                console.log('Estudante cadastrado com sucesso:', data);
+
+                // Redirecionar para a página de sucesso
+                window.location.href = 'success_message.html';
+            })
+            .catch(error => console.error('Erro ao cadastrar estudante:', error));
+        }
+    </script>
+
+</body>
+</html>
